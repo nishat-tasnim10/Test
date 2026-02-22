@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:untitled2/main.dart';
-import 'WelcomeScreen.dart';
+
+
 import 'HomePage.dart';
 
 class LoginPage extends  StatefulWidget{
@@ -17,7 +17,8 @@ class _LoginPageState extends State<LoginPage> {
   var nameText = TextEditingController();
   var passText = TextEditingController();
 
-    void dispose(){
+    @override
+  void dispose(){
       nameText.dispose();
       passText.dispose();
       super.dispose();
