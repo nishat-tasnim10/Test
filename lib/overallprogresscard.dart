@@ -29,7 +29,7 @@ class OverallProgressCard extends StatelessWidget {
           const Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              "Overall Progress",
+              "Overall Progresss",
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
