@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class physics extends StatefulWidget {
-  const physics({super.key});
+class Physics extends StatefulWidget {
+  const Physics({super.key});
 
   @override
-  State<physics> createState() => physicsState();
+  State<Physics> createState() => PhysicsState();
 }
 
-class physicsState extends State<physics>
+class PhysicsState extends State<Physics>
     with TickerProviderStateMixin {
   late AnimationController _controller;
   late List<Animation<Offset>> _animations;
@@ -28,10 +28,9 @@ class physicsState extends State<physics>
       duration: const Duration(milliseconds: 1200),
     );
 
-    // Staggered animation like Biology & Math
     _animations = List.generate(topics.length, (index) {
-      final start = index * 0.1;
-      final end = start + 0.5;
+      final double start = index * 0.1;
+      final double end = (start + 0.5).clamp(0.0, 1.0);
 
       return Tween<Offset>(
         begin: const Offset(0, 1),
@@ -59,7 +58,20 @@ class physicsState extends State<physics>
       appBar: AppBar(
         title: const Text("Physics"),
         backgroundColor: const Color(0xFF132E35),
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 15),
+            child: Icon(Icons.bolt, color: Colors.white),
+          ),
+        ],
       ),
+
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -71,10 +83,11 @@ class physicsState extends State<physics>
             end: Alignment.bottomCenter,
           ),
         ),
+
         child: SingleChildScrollView(
           child: Padding(
-            padding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+            padding: const EdgeInsets.symmetric(
+                horizontal: 20, vertical: 40),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -94,7 +107,7 @@ class physicsState extends State<physics>
                     padding: const EdgeInsets.only(bottom: 20),
                     child: SlideTransition(
                       position: _animations[index],
-                      child: _PhysicsButton(title: topics[index]),
+                      child: PhysicsButton(title: topics[index]),
                     ),
                   );
                 }),
@@ -107,16 +120,16 @@ class physicsState extends State<physics>
   }
 }
 
-class _PhysicsButton extends StatefulWidget {
+class PhysicsButton extends StatefulWidget {
   final String title;
 
-  const _PhysicsButton({required this.title});
+  const PhysicsButton({super.key, required this.title});
 
   @override
-  State<_PhysicsButton> createState() => _PhysicsButtonState();
+  State<PhysicsButton> createState() => _PhysicsButtonState();
 }
 
-class _PhysicsButtonState extends State<_PhysicsButton> {
+class _PhysicsButtonState extends State<PhysicsButton> {
   bool isHovering = false;
   bool isPressed = false;
 
@@ -126,41 +139,57 @@ class _PhysicsButtonState extends State<_PhysicsButton> {
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => isHovering = true),
       onExit: (_) => setState(() => isHovering = false),
+
       child: GestureDetector(
         onTapDown: (_) => setState(() => isPressed = true),
         onTapUp: (_) => setState(() => isPressed = false),
         onTapCancel: () => setState(() => isPressed = false),
+
         onTap: () {
-          print("${widget.title} clicked");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  BlankPage(title: widget.title),
+            ),
+          );
         },
+
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
+          duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOut,
+
           height: 80,
           width: double.infinity,
-          transform: Matrix4.identity()..scale(isPressed ? 0.97 : 1.0),
+
+          transform: Matrix4.identity()
+            ..scale(isPressed ? 0.97 : (isHovering ? 1.03 : 1.0)),
+
           decoration: BoxDecoration(
             color: isHovering
-                ? const Color(0xFF004D40)
+                ? Colors.teal.shade700   // ✅ strong visible hover color
                 : Colors.white,
+
             borderRadius: BorderRadius.circular(20),
 
-            // Border glow
             border: Border.all(
-              color: isHovering ? Colors.tealAccent : Colors.transparent,
+              color: isHovering
+                  ? Colors.tealAccent
+                  : Colors.transparent,
               width: 2,
             ),
 
-            // Shadow
             boxShadow: [
               BoxShadow(
-                color:
-                Colors.black.withOpacity(isHovering ? 0.35 : 0.1),
-                blurRadius: isHovering ? 20 : 8,
-                offset: const Offset(0, 5),
+                color: Colors.black.withOpacity(
+                  isHovering ? 0.35 : 0.1,
+                ),
+                blurRadius: isHovering ? 25 : 8,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
+
           child: Center(
             child: Text(
               widget.title,
@@ -170,6 +199,44 @@ class _PhysicsButtonState extends State<_PhysicsButton> {
                 color: isHovering ? Colors.white : Colors.teal,
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Blank Page
+class BlankPage extends StatelessWidget {
+  final String title;
+
+  const BlankPage({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: const Color(0xFF132E35),
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 15),
+            child: Icon(Icons.bolt, color: Colors.white),
+          ),
+        ],
+      ),
+      body: Center(
+        child: Text(
+          "Welcome to $title",
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
