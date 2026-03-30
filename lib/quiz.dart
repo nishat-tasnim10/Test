@@ -8,10 +8,32 @@ class QuizScreen extends StatefulWidget {
 }
 
 class _QuizScreenState extends State<QuizScreen> {
-  int selectedOptionIndex = -1; // tracks selected option
+  int selectedOptionIndex = -1;
+  int currentQuestionIndex = 0;
+
+  
+  List<Map<String, dynamic>> questions = [
+    {
+      "question": "What is the capital of France?",
+      "options": ["Paris", "London", "Berlin", "Rome"],
+      "answer": 0,
+    },
+    {
+      "question": "2 + 2 = ?",
+      "options": ["3", "4", "5", "6"],
+      "answer": 1,
+    },
+    {
+      "question": "Which is a programming language?",
+      "options": ["HTML", "CSS", "Python", "Photoshop"],
+      "answer": 2,
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
+    var currentQuestion = questions[currentQuestionIndex];
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       body: SafeArea(
@@ -22,13 +44,13 @@ class _QuizScreenState extends State<QuizScreen> {
             children: [
               const SizedBox(height: 10),
 
-              // ✅ Header Row with Back button and Title
+              // 🔹 Header
               Row(
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.blue),
                     onPressed: () {
-                      Navigator.pop(context); // go back
+                      Navigator.pop(context);
                     },
                   ),
                   const Expanded(
@@ -42,29 +64,30 @@ class _QuizScreenState extends State<QuizScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 48), // balance spacing
+                  const SizedBox(width: 48),
                 ],
               ),
 
               const SizedBox(height: 25),
 
-              // ✅ Progress Bar
+            
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: LinearProgressIndicator(
-                  value: 3 / 8, // example progress
+                  value:
+                  (currentQuestionIndex + 1) / questions.length, // FIXED
                   minHeight: 6,
-                  backgroundColor: Colors.grey.shade300,
+                  backgroundColor: Colors.teal.shade300,
                   color: Colors.blue,
                 ),
               ),
 
               const SizedBox(height: 8),
 
-              const Center(
+              Center(
                 child: Text(
-                  "Question 3 of 8",
-                  style: TextStyle(
+                  "Question ${currentQuestionIndex + 1} of ${questions.length}",
+                  style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
@@ -73,50 +96,43 @@ class _QuizScreenState extends State<QuizScreen> {
 
               const SizedBox(height: 25),
 
-              // ✅ Question Container
+          
               Container(
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Colors.teal,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    )
-                  ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      "Given Question: What is the capital of France?",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Divider(height: 20),
-                    SizedBox(height: 10),
-                  ],
+                child: Text(
+                  currentQuestion["question"], // FIXED
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
 
               const SizedBox(height: 25),
 
-              // ✅ Options
-              buildOption(0, "Paris"),
-              const SizedBox(height: 15),
-              buildOption(1, "London"),
-              const SizedBox(height: 15),
-              buildOption(2, "Berlin"),
-              const SizedBox(height: 15),
-              buildOption(3, "Rome"),
+              // 🔹 Dynamic Options
+              ...List.generate(
+                currentQuestion["options"].length,
+                    (index) {
+                  return Column(
+                    children: [
+                      buildOption(
+                        index,
+                        currentQuestion["options"][index],
+                      ),
+                      const SizedBox(height: 15),
+                    ],
+                  );
+                },
+              ),
 
               const Spacer(),
 
-              // ✅ Next Button
+              // 🔹 Next Button
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -130,11 +146,32 @@ class _QuizScreenState extends State<QuizScreen> {
                   onPressed: selectedOptionIndex == -1
                       ? null
                       : () {
-                    // Example: print selection
-                    print(
-                        "Selected Option: $selectedOptionIndex");
-
-                    // TODO: Navigate to next question
+                    if (currentQuestionIndex <
+                        questions.length - 1) {
+                      setState(() {
+                        currentQuestionIndex++;
+                        selectedOptionIndex = -1; // reset
+                      });
+                    } else {
+                      // ✅ Quiz finished
+                      showDialog(
+                        context: context,
+                        builder: (_) => AlertDialog(
+                          title: const Text("Finished"),
+                          content:
+                          const Text("You completed the quiz!"),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                              },
+                              child: const Text("OK"),
+                            )
+                          ],
+                        ),
+                      );
+                    }
                   },
                   child: const Text(
                     "Next",
@@ -151,9 +188,10 @@ class _QuizScreenState extends State<QuizScreen> {
     );
   }
 
-  /// 🔹 Option Widget
+  // 🔹 Option Widget
   Widget buildOption(int index, String text) {
     bool isSelected = selectedOptionIndex == index;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -164,7 +202,7 @@ class _QuizScreenState extends State<QuizScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 15),
         height: 60,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white, // FIXED (better UI)
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isSelected ? Colors.blue : Colors.grey.shade300,
@@ -173,14 +211,11 @@ class _QuizScreenState extends State<QuizScreen> {
         ),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 12,
-              backgroundColor: Colors.transparent,
-              child: Icon(
-                isSelected ? Icons.check_circle : Icons.circle_outlined,
-                color: isSelected ? Colors.blue : Colors.grey,
-                size: 22,
-              ),
+            Icon(
+              isSelected
+                  ? Icons.check_circle
+                  : Icons.circle_outlined,
+              color: isSelected ? Colors.blue : Colors.grey,
             ),
             const SizedBox(width: 10),
             Text(
