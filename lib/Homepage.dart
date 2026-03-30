@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:prachi/chesmistry.dart';
 import 'physics.dart';
 import 'biology.dart';
-//import 'chemistry.dart';
 import 'math.dart';
 
 class Homepage extends StatefulWidget {
@@ -206,21 +205,21 @@ class _State extends State<Homepage> with TickerProviderStateMixin {
               top: 520,
               left: 240,
               child:
-              subjectButton("Assets/Math.png", "Math", const math()),
+              subjectButton("Assets/Math.png", "Math", const MathPage()),
             ),
 
             Positioned(
               top: 700,
               left: 45,
               child: subjectButton("Assets/7614875.png",
-                  "Chemistry", const chemistry()),
+                  "Chemistry", const ChemistryPage()),
             ),
 
             Positioned(
               top: 700,
               left: 240,
               child: subjectButton(
-                  "Assets/physics.png", "Physics", const physics()),
+                  "Assets/physics.png", "Physics", const Physics()),
             ),
           ],
         ),
@@ -239,7 +238,9 @@ class _State extends State<Homepage> with TickerProviderStateMixin {
     );
   }
 
-}class _HoverSubjectButton extends StatefulWidget {
+}
+
+class _HoverSubjectButton extends StatefulWidget {
 final String imagePath;
 final String text;
 final Widget page;
