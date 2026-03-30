@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class math extends StatefulWidget {
-  const math({super.key});
+class MathPage extends StatefulWidget {
+  const MathPage({super.key});
 
   @override
-  State<math> createState() => mathState();
+  State<MathPage> createState() => MathPageState();
 }
 
-class mathState extends State<math> with TickerProviderStateMixin {
+class MathPageState extends State<MathPage> with TickerProviderStateMixin {
   late AnimationController _controller;
   late List<Animation<Offset>> _animations;
 
@@ -28,8 +28,8 @@ class mathState extends State<math> with TickerProviderStateMixin {
     );
 
     _animations = List.generate(topics.length, (index) {
-      final start = index * 0.1;
-      final end = start + 0.5;
+      final double start = index * 0.1;
+      final double end = (start + 0.5).clamp(0.0, 1.0);
 
       return Tween<Offset>(
         begin: const Offset(0, 1),
@@ -57,18 +57,12 @@ class mathState extends State<math> with TickerProviderStateMixin {
       appBar: AppBar(
         title: const Text("Math"),
         backgroundColor: const Color(0xFF132E35),
-
-        // ✅ Arrow + icons visible
         iconTheme: const IconThemeData(color: Colors.white),
-
-        // ✅ Title visible
         titleTextStyle: const TextStyle(
           color: Colors.white,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
-
-        // ✅ Math icon
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 15),
@@ -110,7 +104,7 @@ class mathState extends State<math> with TickerProviderStateMixin {
                     padding: const EdgeInsets.only(bottom: 20),
                     child: SlideTransition(
                       position: _animations[index],
-                      child: _MathButton(title: topics[index]),
+                      child: MathButton(title: topics[index]),
                     ),
                   );
                 }),
@@ -123,16 +117,16 @@ class mathState extends State<math> with TickerProviderStateMixin {
   }
 }
 
-class _MathButton extends StatefulWidget {
+class MathButton extends StatefulWidget {
   final String title;
 
-  const _MathButton({required this.title});
+  const MathButton({super.key, required this.title});
 
   @override
-  State<_MathButton> createState() => _MathButtonState();
+  State<MathButton> createState() => _MathButtonState();
 }
 
-class _MathButtonState extends State<_MathButton> {
+class _MathButtonState extends State<MathButton> {
   bool isHovering = false;
   bool isPressed = false;
 
@@ -147,12 +141,11 @@ class _MathButtonState extends State<_MathButton> {
         onTapUp: (_) => setState(() => isPressed = false),
         onTapCancel: () => setState(() => isPressed = false),
 
-        /// ✅ NAVIGATION
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BlankPage(title: widget.title),
+              builder: (context) => MathBlankPage(title: widget.title),
             ),
           );
         },
@@ -197,11 +190,10 @@ class _MathButtonState extends State<_MathButton> {
   }
 }
 
-/// ✅ SECOND PAGE
-class BlankPage extends StatelessWidget {
+class MathBlankPage extends StatelessWidget {
   final String title;
 
-  const BlankPage({super.key, required this.title});
+  const MathBlankPage({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -209,17 +201,12 @@ class BlankPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         backgroundColor: const Color(0xFF132E35),
-
-        // ✅ Arrow visible here too
         iconTheme: const IconThemeData(color: Colors.white),
-
         titleTextStyle: const TextStyle(
           color: Colors.white,
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
-
-        // ✅ Math icon
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 15),
