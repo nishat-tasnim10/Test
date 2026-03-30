@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 
-class chemistry extends StatefulWidget {
-  const chemistry({super.key});
+class ChemistryPage extends StatefulWidget {
+  const ChemistryPage({super.key});
 
   @override
-  State<chemistry> createState() => chemistryState();
+  State<ChemistryPage> createState() => ChemistryPageState();
 }
 
-class chemistryState extends State<chemistry> with TickerProviderStateMixin {
+class ChemistryPageState extends State<ChemistryPage> with TickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Offset> _animation;
+  late List<Animation<Offset>> _animations;
+
+  final List<String> topics = [
+    "Organic Chemistry",
+    "Inorganic Chemistry",
+    "Physical Chemistry",
+    "Analytical Chemistry",
+  ];
 
   @override
   void initState() {
@@ -17,15 +24,23 @@ class chemistryState extends State<chemistry> with TickerProviderStateMixin {
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 1200),
     );
 
-    _animation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _animations = List.generate(topics.length, (index) {
+      final double start = index * 0.1;
+      final double end = (start + 0.5).clamp(0.0, 1.0);
+
+      return Tween<Offset>(
+        begin: const Offset(0, 1),
+        end: Offset.zero,
+      ).animate(
+        CurvedAnimation(
+          parent: _controller,
+          curve: Interval(start, end, curve: Curves.easeOut),
+        ),
+      );
+    });
 
     _controller.forward();
   }
@@ -39,7 +54,22 @@ class chemistryState extends State<chemistry> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar( backgroundColor:Color(0xFF132E35) ,),
+      appBar: AppBar(
+        title: const Text("Chemistry"),
+        backgroundColor: const Color(0xFF132E35),
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 15),
+            child: Icon(Icons.science, color: Colors.white),
+          ),
+        ],
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -53,7 +83,8 @@ class chemistryState extends State<chemistry> with TickerProviderStateMixin {
         ),
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 60),
+            padding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -67,25 +98,16 @@ class chemistryState extends State<chemistry> with TickerProviderStateMixin {
                 ),
                 const SizedBox(height: 30),
 
-                SlideTransition(
-                  position: _animation,
-                  child: buildBox("Organic Chemistry"),
-                ),
-                const SizedBox(height: 20),
-                SlideTransition(
-                  position: _animation,
-                  child: buildBox("Inorganic Chemistry"),
-                ),
-                const SizedBox(height: 20),
-                SlideTransition(
-                  position: _animation,
-                  child: buildBox("Physical Chemistry"),
-                ),
-                const SizedBox(height: 20),
-                SlideTransition(
-                  position: _animation,
-                  child: buildBox("Analytical Chemistry"),
-                ),
+                /// Animated clickable boxes
+                ...List.generate(topics.length, (index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: SlideTransition(
+                      position: _animations[index],
+                      child: ChemistryBox(title: topics[index]),
+                    ),
+                  );
+                }),
               ],
             ),
           ),
@@ -93,29 +115,103 @@ class chemistryState extends State<chemistry> with TickerProviderStateMixin {
       ),
     );
   }
+}
 
-  Widget buildBox(String title) {
-    return Container(
-      height: 80,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, 4),
+class ChemistryBox extends StatefulWidget {
+  final String title;
+
+  const ChemistryBox({super.key, required this.title});
+
+  @override
+  State<ChemistryBox> createState() => _ChemistryBoxState();
+}
+
+class _ChemistryBoxState extends State<ChemistryBox> {
+  bool isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => isHovering = true),
+      onExit: (_) => setState(() => isHovering = false),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ChemistryBlankPage(title: widget.title),
+            ),
+          );
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          height: 80,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: isHovering
+                ? const Color(0xFF004D40)
+                : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isHovering ? Colors.tealAccent : Colors.transparent,
+              width: 2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color:
+                Colors.black.withOpacity(isHovering ? 0.35 : 0.1),
+                blurRadius: isHovering ? 20 : 8,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              widget.title,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: isHovering ? Colors.white : Colors.teal,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ChemistryBlankPage extends StatelessWidget {
+  final String title;
+
+  const ChemistryBlankPage({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: const Color(0xFF132E35),
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 15),
+            child: Icon(Icons.science, color: Colors.white),
           ),
         ],
       ),
-      child: Center(
+      body: Center(
         child: Text(
-          title,
+          "Welcome to $title",
           style: const TextStyle(
-            fontSize: 20,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: Colors.teal,
           ),
         ),
       ),
